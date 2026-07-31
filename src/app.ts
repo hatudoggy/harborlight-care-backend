@@ -2,28 +2,15 @@ import { randomUUID } from "node:crypto";
 
 import { cors } from "hono/cors";
 import { Hono } from "hono";
-import { z } from "zod";
 
-import type { Lead } from "./types.js";
+import { createLeadSchema } from "./db/lead/lead.dto.js";
+import { initStore, insertLead, listLeads } from "./db/lead/lead.queries.js";
+import type { Lead } from "./db/lead/lead.types.js";
 
-const createLeadSchema = z.object({
-  firstName: z.string().trim().min(1).max(80),
-  lastName: z.string().trim().min(1).max(80),
-  emailAddress: z.email().max(254),
-  phoneNumber: z.string().trim().min(7).max(30),
-  serviceType: z.enum([
-    "companion-care",
-    "personal-support",
-    "recovery-at-home",
-    "not-sure",
-  ]),
-  message: z.string().trim().max(1500).optional(),
-  consent: z.literal(true),
-});
+export async function createApp() {
+  await initStore();
 
-export function createApp() {
   const app = new Hono();
-  const leads = new Map<string, Lead>();
 
   app.use(
     "/api/*",
@@ -47,11 +34,14 @@ export function createApp() {
     context.json({ status: "ok", service: "harborlight-leads" }),
   );
 
-  app.get("/api/leads/list", (context) => {
-    const leadList = [...leads.values()].sort((a, b) =>
-      b.createdAt.localeCompare(a.createdAt),
-    );
-    return context.json({ leads: leadList, total: leadList.length });
+  app.get("/api/leads/list", async (context) => {
+    try {
+      const leadList = await listLeads();
+      return context.json({ leads: leadList, total: leadList.length });
+    } catch (error) {
+      console.error(error);
+      return context.json({ error: "Failed to retrieve leads" }, 500);
+    }
   });
 
   app.post("/api/leads", async (context) => {
@@ -80,7 +70,7 @@ export function createApp() {
       createdAt: now,
       updatedAt: now,
     };
-    leads.set(lead.id, lead);
+    await insertLead(lead);
 
     return context.json({ lead }, 201);
   });
@@ -94,4 +84,4 @@ export function createApp() {
   return app;
 }
 
-export const app = createApp();
+export const app = await createApp();
