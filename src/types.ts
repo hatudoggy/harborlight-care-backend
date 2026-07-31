@@ -2,7 +2,7 @@ export type Lead = {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  emailAddress: string;
   phoneNumber: string;
   serviceType: string;
   message?: string;

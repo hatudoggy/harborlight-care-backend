@@ -9,7 +9,7 @@ import type { Lead } from "./types.js";
 const createLeadSchema = z.object({
   firstName: z.string().trim().min(1).max(80),
   lastName: z.string().trim().min(1).max(80),
-  email: z.email().max(254),
+  emailAddress: z.email().max(254),
   phoneNumber: z.string().trim().min(7).max(30),
   serviceType: z.enum([
     "companion-care",
@@ -75,7 +75,7 @@ export function createApp() {
     const lead: Lead = {
       id: randomUUID(),
       ...parsed.data,
-      email: parsed.data.email.toLowerCase(),
+      emailAddress: parsed.data.emailAddress.toLowerCase(),
       status: "new",
       createdAt: now,
       updatedAt: now,
