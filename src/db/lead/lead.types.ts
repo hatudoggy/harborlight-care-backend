@@ -4,6 +4,7 @@ export type Lead = {
   lastName: string;
   emailAddress: string;
   phoneNumber: string;
+  preferredContact: "phone" | "email";
   serviceType: string;
   message?: string;
   consent: true;
@@ -18,6 +19,7 @@ export interface LeadRow {
   last_name: string;
   email_address: string;
   phone_number: string;
+  preferred_contact: string | null;
   service_type: string;
   message: string | null;
   consent: boolean;
@@ -33,6 +35,7 @@ export function toRow(lead: Lead): LeadRow {
     last_name: lead.lastName,
     email_address: lead.emailAddress,
     phone_number: lead.phoneNumber,
+    preferred_contact: lead.preferredContact,
     service_type: lead.serviceType,
     message: lead.message ?? null,
     consent: lead.consent,
@@ -49,6 +52,7 @@ export function fromRow(row: LeadRow): Lead {
     lastName: row.last_name,
     emailAddress: row.email_address,
     phoneNumber: row.phone_number,
+    preferredContact: (row.preferred_contact as "phone" | "email") ?? "phone",
     serviceType: row.service_type,
     message: row.message ?? undefined,
     consent: row.consent as true,

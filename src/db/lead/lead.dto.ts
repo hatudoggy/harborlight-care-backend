@@ -11,6 +11,7 @@ export const createLeadSchema = z.object({
     "recovery-at-home",
     "not-sure",
   ]),
+  preferredContact: z.enum(["phone", "email"]),
   message: z.string().trim().max(1500).optional(),
   consent: z.literal(true),
 });
